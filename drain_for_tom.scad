@@ -4,11 +4,13 @@ include <shapes/elongated_torus.scad>
 
 
 
-$fn=30;
+$fn=60;
 
 // used to make larger cutouts to stop z-fighting
 // set to 0 before generating final build
 zf=0.1;
+
+total_height = 57;
 
 body_width = 10;
 body_height = 5;
@@ -23,10 +25,19 @@ oval_base_x = 175;
 oval_base_y = 57;
 oval_base_z = 5.5;
 
-screw_hole_r = 6.3/2; 
+screw_hole_r = 6.3/2;
+screw_hole_clearance_r = screw_hole_r+5;
 
 center_cutout_x = oval_base_x - 23*2;
 center_cutout_y = 12;
+
+pipe_z = total_height-oval_base_z; //real pipe_z is 21, but we decide to bring it all the way to the base instead
+pipe_r = 46.5/2;
+pipe_inner_r = pipe_r-8;
+
+drain_funnel_x = oval_base_x - 23;
+drain_funnel_y = oval_base_y - 33; // picked to give clearance to screw holes
+drain_funnel_z = 36-oval_base_z;
 
 module oval_base() {
     
@@ -41,72 +52,75 @@ module oval_base() {
         
         translate([oval_base_x/2-55,-oval_base_y/2+8,-5]) cylinder(h=10, r=screw_hole_r);
         
-        translate([-oval_base_x/2+55,-oval_base_y/2+8,-5]) cylinder(h=10, r=screw_hole_r);
+        translate([-oval_base_x/2+55,-oval_base_y/2+8,-5]) {
+            cylinder(h=10, r=screw_hole_r);
+            
+            // Debug cutout, used to make sure we give the screw holes enough room.
+            // Comment out before exporting
+            cylinder(h=10, r=screw_hole_clearance_r);
+        }
         
         // center cutout
         elongated_cylinder(center_cutout_x, center_cutout_y, 10);
     }
 }
-oval_base();
+translate([0,0,oval_base_z/2]) oval_base();
 
-module cutout() {
-    translate([0,0,-15]) {
-            cylinder(h=30, r=drain_inner_diameter);
+module pipe() {
+    difference() {
+        translate([0,0,total_height-pipe_z]) {
+            cylinder(h=pipe_z, r=pipe_r);
+        }
+        drain_funnel_channel();  
     }
 }
 
-module drain() {
-   
-    difference() {
-        // Pipe
-        translate([0,0,-drain_height-body_depth/2]) {
-            cylinder(h=drain_height, r=drain_outer_diameter);
-        };
-        
-        cutout();
-    };
-    
+module pipe_cutout() {
+    // decided to use a cube instead of a cylinder
+    //cylinder(h=pipe_z+3, r=pipe_inner_r);
+    elongated_cylinder(pipe_inner_r*2+4, drain_funnel_y/2, 200);            
 }
 
-module silicon_cutout(w, d1, d2) {
-    elongated_torus(w=w, d=d1, inner_radius=1);
+difference() {
+    pipe();
+    pipe_cutout();
 }
 
-//module oval_torus(inner_radius, thickness=[0, 0])
-//{
-//rotate_extrude() translate([inner_radius+thickness[0]/2,0,0]) //ellipse(width=thickness[0], height=thickness[1]);
-//}
+module drain_funnel_channel() {
+    // these numbers were winged instead of being measured
+    drain_funnel_channel_x = drain_funnel_x-10;
 
-// oval_torus(80,thickness=[1, 1]);
-
-///////
-*difference(){
-    elongated_cylinder(body_width, body_height, body_depth);
-    
-    //translate([0, 0, 0.5]){
-    //    elongated_cylinder(body_width-1, body_height-1, body_depth+zf);
-    //}
-    
-    // pipe cutout
-    cutout();
-    
-    // silicon fill cutout
-    //translate([0, 0, 1.7]){
-    //    elongated_torus(w=body_width-0.5, d=body_height-0.7, inner_radius=1);
-    //}
-    
-    // drain cutout
-    cylinder_cutout_height=1;
-    translate([0, -cylinder_cutout_height/2, body_height]){
-        scale([1, 1, 2]){
-            rotate([0, 90, 90]){
-                cylinder(cylinder_cutout_height, 3, 3);
+    translate([0,center_cutout_y/2,-40]){
+        scale([1,1,0.9]){
+            rotate([90, 0, 0]){
+                cylinder(h=center_cutout_y, r=drain_funnel_channel_x/2+10);
             }
         }
     }
 }
 
-//drain();
+module drain_funnel() {
+    // drain funnel body
+    elongated_cylinder(drain_funnel_x, drain_funnel_y, drain_funnel_z);  
+}
 
-//english_thread(1, 10, 1);
+difference() {
+    // drain funnel
+    intersection() {
+        translate([0,0,drain_funnel_z/2 + oval_base_z]){
+            drain_funnel();
+        }
+        scale([1.2,2,1.1]) drain_funnel_channel();
+    }
+    
+    //channel
+    drain_funnel_channel();
+    
+    //channel-pipe interface
+    pipe_cutout();
+}
+//drain_funnel_channel();
+//color("red") translate([0,10,0]) scale([1.2,2,1.1]) drain_funnel_channel();
+
+ 
 
