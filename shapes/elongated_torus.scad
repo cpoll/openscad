@@ -58,5 +58,3 @@ module elongated_torus(w, d, inner_radius=0.5, center=true) {
         _elongated_torus(w, d, h);
     }
 }
-
-// elongated_torus(26, 9, 2, center=false);
