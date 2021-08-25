@@ -1,4 +1,3 @@
-
 module elongated_cylinder(w, d, h, center=true) {
     // Like a cylinder with two flat sides
     // Assumes the cylinder is elongated along the x-axis     
@@ -7,14 +6,13 @@ module elongated_cylinder(w, d, h, center=true) {
         circle_radius = d/2;
         
         translate([circle_radius, d/2, 0]){
-            cylinder(r=d/2,h=h);
+            cylinder(r=circle_radius,h=h);
         }
         
         translate([w-circle_radius, d/2, 0]){
-            cylinder(r=d/2,h=h);
+            cylinder(r=circle_radius,h=h);
         }
         
-        //circle(r=x/2);
         translate([circle_radius, 0, 0]){
             cube([w-circle_radius*2, d, h]);
         }
