@@ -57,7 +57,7 @@ module oval_base() {
             
             // Debug cutout, used to make sure we give the screw holes enough room.
             // Comment out before exporting
-            cylinder(h=10, r=screw_hole_clearance_r);
+            //cylinder(h=10, r=screw_hole_clearance_r);
         }
         
         // center cutout
