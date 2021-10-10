@@ -5,7 +5,7 @@ bar_inside_depth = 8;
 bar_middle_section_depth = 4.8;
 bar_middle_section_width = 22;
 
-arms_thickness = 12.5; // bar thickness is 14.5
+arms_thickness = 10;
 
 bar_cutout_extra = 3;
 
@@ -32,7 +32,7 @@ module left_arm() {
     difference(){
         cube([arms_width, mounting_tape_width, arms_thickness+bar_cutout_extra]);
 
-        translate([0, 0, 3])
+        translate([0, 0, arms_thickness/2])
         rotate([0, -15, 0])
             cube([arms_width*2, mounting_tape_width, arms_thickness+bar_cutout_extra]);
     }
